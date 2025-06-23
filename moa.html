@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>MovieLingo</title>
+
+        <style>
+            #scene {
+                width: 400px;
+            }
+        </style>
+
+    </head>
+
+    <body>
+        <div id="sceneCtn">
+            <img id="scene" src="content/01_breaking_bad/images/1.jpg" />
+        </div>
+        <form action="/checkAnswer" method="post">
+            <input id="userAnswer" value="Good Morning." />
+            <input type="submit" value="Send" />
+        </form>
+
+        <div id="englishSubtitles">
+            Good Morning.
+        </div>
+        <div id="options">
+            <button>Morning.</button>
+            <button>Good</button>
+        </div>
+
+    </body>
+</html>
