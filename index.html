@@ -3,31 +3,24 @@
     <head>
         <meta charset="UTF-8">
         <title>MovieLingo</title>
-
-        <style>
-            #scene {
-                width: 400px;
-            }
-        </style>
-
+        <link rel="stylesheet" href="style.css">
     </head>
 
     <body>
         <div id="sceneCtn">
-            <img id="scene" src="content/01_breaking_bad/images/1.jpg" />
+            <img id="scene" src="" alt="Bild som ändras dynamiskt" />
         </div>
-        <form action="/check_answer" method="post">
-            <input id="user_answer" name="user_answer" />
+        <form action="/check-answer" method="post">
+            <input id="user-answer" name="user-answer" />
             <input type="submit" value="Send" />
         </form>
 
-        <div id="englishSubtitles">
+        <div id="english-subtitles">
             english_sentence
         </div>
         <div id="options">
-            <button>dias.</button>
-            <button>Buenos</button>
         </div>
 
+    <script src="main.js" defer></script>
     </body>
 </html>

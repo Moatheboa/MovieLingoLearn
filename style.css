@@ -1,0 +1,11 @@
+#scene {
+    width: 400px;
+}
+
+.option-button {
+    background-color: lightgray;
+}
+
+.selected-option {
+    background-color: darkgray;
+}
