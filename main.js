@@ -16,7 +16,12 @@ fetch('/getdata')
 
     let optionsDiv = document.getElementById("options");
 
-    for (let i = 0; i < currentTranslation.length; i++ ) {
+    let sendButton = document.getElementById("send-button");
+
+    let spanishLength = currentTranslation.length;  // Nr of words in foreign language sentence
+    let wordCount = 0;  //Nr of words user sent to userGuess
+
+    for (let i = 0; i < spanishLength; i++ ) {
         let optionButton = document.createElement("button");
         optionButton.id = "b" + i;
         optionButton.className = "option-button";
@@ -25,6 +30,8 @@ fetch('/getdata')
             optionButton.classList.toggle("selected-option");  // changes buttons aestetics in css
             optionButton.disabled = true;  // makes is unclickable
             userGuess.value += currentTranslation[i];  // adds the word to div for user's guess
+            wordCount += 1;
+            sendButton.disabled = (wordCount !== spanishLength);
         }
         optionsDiv.appendChild(optionButton);
     }

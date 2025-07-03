@@ -5,8 +5,8 @@ import mimetypes
 import json
 
 class Db:
-    spanish_answers = ["Esto debo ser obtenido del server", "Hola", "Buenos dias"]
-    english_answers = ["This should be fetched from server", "Hi", "Good morning"]
+    spanish_answers = ["Esto es", "Hola", "Buenos dias"]
+    english_answers = ["This is", "Hi", "Good morning"]
     img_path = ["content/01_breaking_bad/images/1.jpg", "content/01_breaking_bad/images/1.jpg", "content/01_breaking_bad/images/1.jpg"]
 
     def find_by_id(self, id):
