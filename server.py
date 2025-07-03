@@ -1,10 +1,45 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
+import random
 from urllib import parse
 import mimetypes
+import json
 
-class handler(BaseHTTPRequestHandler):
+class Db:
+    spanish_answers = ["Esto debo ser obtenido del server", "Hola", "Buenos dias"]
+    english_answers = ["This should be fetched from server", "Hi", "Good morning"]
+    img_path = ["content/01_breaking_bad/images/1.jpg", "content/01_breaking_bad/images/1.jpg", "content/01_breaking_bad/images/1.jpg"]
+
+    def find_by_id(self, id):
+        if id - 1 >= len(self.spanish_answers):
+            return None  # User has already completed all sentences in database
+        return (self.spanish_answers[id - 1], self.english_answers[id - 1], self.img_path[id-1])
+    
+class Handler(BaseHTTPRequestHandler):
+
+    current_id = 1  # Counter to keep track of which id is used as parameter to db
+    db = Db()
 
     def do_GET(self):
+
+        # ---------- Sends sentences to js ---------
+        spanish, english, img_path = Handler.db.find_by_id(Handler.current_id)
+        spanish_shuffled = [word + " " for word in spanish.split()]  # Adds a space after each word (even the last word!) so it can be compared to original sentence later
+        random.shuffle(spanish_shuffled)
+
+        if self.path == "/getdata":
+            self.send_response(200)
+            self.send_header("Content-type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")  # Allows js to fetch
+            self.end_headers()
+            data = {
+                "spanish_shuffled": spanish_shuffled,
+                "english": english,
+                "img_path": img_path
+            }
+            self.wfile.write(json.dumps(data).encode())
+            return
+
+        # ------------ Sends to htlm --------------------
         file_path = "." + self.path
         if self.path == "/":
             file_path = "./index.html"
@@ -23,40 +58,43 @@ class handler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(b"File not found.")  # Replaces client's page with this message
 
-
     def do_POST(self):
-        self.send_response(200)
-        self.send_header("Content-type", "text/html")
-        self.end_headers()
 
-        db = Db()
-        right_answer, _ = db.find_by_id(1)
-        print(right_answer)
+        right_answer, _, _ = Handler.db.find_by_id(Handler.current_id)
+        if not right_answer.endswith(" "):
+            right_answer += " "  # All words, incl the last word, gets an extra space when converted to shuffled list: we need to add a space here for comparison
 
         length = int(self.headers.get("content-length"))
         field_data = self.rfile.read(length)
         fields = parse.parse_qs(str(field_data, "UTF-8"))
         user_answer = fields["user-answer"][0]
-        print(user_answer)
 
         if user_answer == right_answer:
-            message = "correct answer"
-        else:
-            message = "Wrong!"
+            Handler.current_id += 1  # Next time Db.find_by_id() is called new sentences will be collected
 
-        self.wfile.write(bytes(message, "utf8"))
+            if Handler.db.find_by_id(Handler.current_id) == None:  # if there are no more sentences in db
+                self.send_response(200)
+                self.send_header("Content-type", "text/html")
+                self.end_headers()
+                self.wfile.write(bytes("Congrats, you completed all sentences!", "utf8"))
+                return
+            
+            else:  # user is redirected to the page again and new sentences are loaded
+                self.send_response(303)
+                self.send_header("Location", "/")
+                self.end_headers()
+                return
 
-class Db:
-    spanish_answers = ["Esto debo ser obtenido del server", "Hola", "Buenos dias"]
-    english_answers = ["This should be fetched from server", "Hi", "Good morning"]
+        else:  # if user guessed wrong
+            self.send_response(200)
+            self.send_header("Content-type", "text/html")
+            self.end_headers()
+            self.wfile.write(bytes("Wrong!", "utf8"))
+            # --> no new sentences, but reset screen so user can try again        
 
-    def find_by_id(self, id):
-        return (self.spanish_answers[id - 1], self.english_answers[id - 1])
-        
 
-with HTTPServer(("", 8000), handler) as server:
+with HTTPServer(("", 8000), Handler) as server:
     server.serve_forever()
-
 
 # from http.server import BaseHTTPRequestHandler, HTTPServer
 # from urllib import parse

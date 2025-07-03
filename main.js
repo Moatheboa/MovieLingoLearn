@@ -1,26 +1,31 @@
-let currentImgPath = "content/01_breaking_bad/images/1.jpg";
-let currentEnglish = "This should be fetched from server";
-let currentTranslation= ["Esto ", "obtenido ", "ser ", "debo ", "server", "del "]; // Already divided in parts and randomly shuffled
+fetch('/getdata')
+  .then(response => response.json())
+  .then(data => {
 
-let img = document.getElementById("scene");
-img.src = currentImgPath;
+    let currentImgPath = data.img_path;
+    let currentEnglish = data.english;
+    let currentTranslation= data.spanish_shuffled;
 
-let englishSentence = document.getElementById("english-subtitles");
-englishSentence.innerText = currentEnglish;
+    let img = document.getElementById("scene");
+    img.src = currentImgPath;
 
-let userGuess = document.getElementById("user-answer");
+    let englishSentence = document.getElementById("english-subtitles");
+    englishSentence.innerText = currentEnglish;
 
-let optionsDiv = document.getElementById("options");
+    let userGuess = document.getElementById("user-answer");
 
-for (let i = 0; i < currentTranslation.length; i++ ) {
-    let optionButton = document.createElement("button");
-    optionButton.id = "b" + i;
-    optionButton.className = "option-button";
-    optionButton.textContent = currentTranslation[i];
-    optionButton.onclick = function() {
-        optionButton.classList.toggle("selected-option");
-        userGuess.value += currentTranslation[i];
-        console.log("Clicked on " + optionButton.textContent);
+    let optionsDiv = document.getElementById("options");
+
+    for (let i = 0; i < currentTranslation.length; i++ ) {
+        let optionButton = document.createElement("button");
+        optionButton.id = "b" + i;
+        optionButton.className = "option-button";
+        optionButton.textContent = currentTranslation[i];
+        optionButton.onclick = function() {
+            optionButton.classList.toggle("selected-option");  // changes buttons aestetics in css
+            optionButton.disabled = true;  // makes is unclickable
+            userGuess.value += currentTranslation[i];  // adds the word to div for user's guess
+        }
+        optionsDiv.appendChild(optionButton);
     }
-    optionsDiv.appendChild(optionButton);
-}
+});
