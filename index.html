@@ -8,15 +8,20 @@
 
     <body>
         <div id="sceneCtn">
-            <img id="scene" src="" alt="Bild som ändras dynamiskt" />
+            <img id="scene" src="" alt="Picture from movie scene" />
         </div>
-        <form action="/" method="post">
+
+        <form id="guess-form">  <!-- No action because post is now made in js -->
+        <input id="user-answer" name="user-answer" />
+        <input id="send-button" type="submit" value="Send" disabled />
+        </form>
+        
+        <!-- <form action="/" method="post">
             <input id="user-answer" name="user-answer" />
             <input id="send-button" type="submit" value="Send" disabled />
-        </form>
+        </form> -->
 
         <div id="english-subtitles">
-            english_sentence
         </div>
         <div id="options">
         </div>

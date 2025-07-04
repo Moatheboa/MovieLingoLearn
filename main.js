@@ -1,4 +1,10 @@
-fetch('/getdata')
+let userGuess = document.getElementById("user-answer");
+let sendButton = document.getElementById("send-button");
+let optionsDiv = document.getElementById("options");
+let wordCount = 0;  //Nr of words user sent to userGuess
+let spanishLength = 0;  // Nr of words in spanish sentence
+
+fetch('/getdata')  // When user first go to index.html and when we redirect them there after correct guess
   .then(response => response.json())
   .then(data => {
 
@@ -11,15 +17,8 @@ fetch('/getdata')
 
     let englishSentence = document.getElementById("english-subtitles");
     englishSentence.innerText = currentEnglish;
-
-    let userGuess = document.getElementById("user-answer");
-
-    let optionsDiv = document.getElementById("options");
-
-    let sendButton = document.getElementById("send-button");
-
-    let spanishLength = currentTranslation.length;  // Nr of words in foreign language sentence
-    let wordCount = 0;  //Nr of words user sent to userGuess
+    spanishLength = currentTranslation.length;
+    userGuess.value = "";  // Reset to clean from last guess words
 
     for (let i = 0; i < spanishLength; i++ ) {
         let optionButton = document.createElement("button");
@@ -36,3 +35,36 @@ fetch('/getdata')
         optionsDiv.appendChild(optionButton);
     }
 });
+
+
+const form = document.getElementById("guess-form");  // when user clicks Send
+    form.addEventListener("submit", function (e) {
+      e.preventDefault(); // prevent default form behavior
+
+      fetch("/", {  // sends to server.py to check if user guessed right or wrong
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({ "user-answer": userGuess.value }),
+      })
+        .then(res => res.text())
+        .then(text => {
+          if (text.includes("congrats")) {  // User was correct and there are no more sentences in db
+            alert("You completed all sentences!");
+            // Here we need to reset current_id in py for db, cannot acces webpage otherwise.
+
+          } else if (text.includes("wrong")) {  // user guessed wrong
+            alert("Wrong! Try again.");
+            userGuess.value = "";
+            wordCount = 0;
+            document.querySelectorAll(".option-button").forEach(button => {
+                button.disabled = false;
+                button.classList.remove("selected-option");
+            });
+            
+          } else {
+            location.reload(); // user guessed right, next sentence is loaded
+          }
+        });
+    });
