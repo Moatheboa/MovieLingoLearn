@@ -14,6 +14,10 @@ class Db:
             return None  # User has already completed all sentences in database
         return (self.spanish_answers[id - 1], self.english_answers[id - 1], self.img_path[id-1])
     
+    def add_movie(path):
+        file = open(path)
+        
+    
 class Handler(BaseHTTPRequestHandler):
 
     db = Db()
