@@ -17,7 +17,14 @@ class Db:
     def add_movie(path):
         file = open(path)
         
-    
+    #def add_movie_to_db(movie_id, title):
+        #connect to db
+        #add row with id and title
+
+    #def add_subtitles_to_db(movie_id, language, path):
+        #read file and make list with sentences.for each line make a new row with same movie_id, same language, calculate scene_id and subtitle.
+
+
 class Handler(BaseHTTPRequestHandler):
 
     db = Db()
