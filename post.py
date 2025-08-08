@@ -1,4 +1,5 @@
 # How to structure everything: from where do we call functions, should cursor and connection be started and closed within each function or should the function take an open cursor as parameter? Should operations related to the same connection be a class?
+# Is it better to do "with conn.cursor() as curs: curs.execute(SQL)"" in each method to not keep it open?
 
 import psycopg2
 from psycopg2 import errors
@@ -23,38 +24,74 @@ def add_subtitles(cursor, movie_id, language, filepath):
                 sql = "INSERT INTO subtitles VALUES(%s, %s, %s, %s)"
                 cursor.execute(sql, (movie_id, count, language, text))
 
-connection = psycopg2.connect(
+def add_user(cursor, username, password):
+    sql = "INSERT INTO users (username, password) VALUES(%s, %s)"
+    cursor.execute(sql, (username, password))
+
+def get_current_scene(cursor, user, movie_id):
+    sql = "SELECT current_scene FROM user_scene_tracking WHERE username = %s AND movie_id = %s"
+    cursor.execute(sql, (user, movie_id))
+
+def new_user_movie(cursor, user, movie_id):
+    sql = "INSERT INTO user_scene_tracking (username, movie_id) VALUES(%s, %s)"
+    cursor.execute(sql, (user, movie_id))
+
+def update_scene_count(cursor, user, movie_id, new_count):
+    sql = "UPDATE user_scene_tracking SET current_scene = %s WHERE username = %s AND movie_id = %s"
+    cursor.execute(sql, (new_count, user, movie_id))
+
+with psycopg2.connect(
     dbname="movielingolearndb",
     user="postgres",
     password="Nobel11Post?",
     host="localhost",
     port="5432"
-)
+) as connection:
+    
+    with connection.cursor() as cursor:
 
-cursor = connection.cursor()
+        with open("schema.sql", "r") as f:
+            sql = f.read()
 
-with open("schema.sql", "r") as f:
-    sql = f.read()
+        sql_commands = [cmd.strip() for cmd in sql.split(';') if cmd.strip()]
+        #sql.split() seperates content of file into part, cmd, by every ; . strip() then removes every empty space. if cmd.strip() means if cmd contains anything (if cmd is empty it is considered false) then it is kept in the list.
 
-sql_commands = [cmd.strip() for cmd in sql.split(';') if cmd.strip()]
-#sql.split() seperates content of file into part, cmd, by every ; . strip() then removes every empty space. if cmd.strip() means if cmd contains anything (if cmd is empty it is considered false) then it is kept in the list.
+        for command in sql_commands:
+            cursor.execute(command)
+        connection.commit()
 
+        try:
+            add_movie(cursor, 'Prison Break')
+            connection.commit()
+        except psycopg2.Error as e:
+            print("Something went wrong:", e)
+            connection.rollback()
 
-for command in sql_commands:
-    cursor.execute(command)
-connection.commit()
+        try:
+            add_subtitles(cursor, 1, 'EN', 'subtitles.srt')
+            connection.commit()
+        except psycopg2.Error as e:
+            print("Something went wrong:", e)
+            connection.rollback()
+        
+        try:
+            add_user(cursor, 'moa', 'mos')
+            connection.commit()
+        except psycopg2.Error as e:
+            print("Something went wrong:", e)
+            connection.rollback()
+        
+        try:
+            new_user_movie(cursor, 'moa', 1)
+        except psycopg2.Error as e:
+            print("Something went wrong:", e)
+            connection.rollback()
 
-try:
-    add_movie(cursor, "Prison Break")
-except psycopg2.Error as e:
-    print("Something went wrong:", e)
+        try:
+            update_scene_count(cursor, 'moa', 1, 2)
+        except psycopg2.Error as e:
+            print("Something went wrong:", e)
+            connection.rollback()
 
-try:
-    add_subtitles(cursor, 1, 'EN', 'subtitles.srt')
-except psycopg2.Error as e:
-    print("Something went wrong:", e)
-
-connection.commit()
-
-cursor.close()
-connection.close()
+# Query to find out which languages are available for a movie: (?)
+# SELECT language FROM subtitles WHERE movie_id = 1 AND movie_scene = 1;

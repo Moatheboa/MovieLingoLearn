@@ -9,13 +9,6 @@ CREATE TABLE movies (
     title VARCHAR(200) NOT NULL
 );
 
-CREATE TABLE available_subs (
-    movie_id INT REFERENCES movies(id),
-    language VARCHAR(5) NOT NULL,
-
-    PRIMARY KEY (movie_id, language)
-);
-
 CREATE TABLE subtitles (
     movie_id INT REFERENCES movies(id),
     movie_scene INT,
