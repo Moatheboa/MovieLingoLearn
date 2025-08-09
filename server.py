@@ -4,6 +4,11 @@ from urllib import parse
 import mimetypes
 import json
 
+from DBHandler import DBHandler
+
+dbHandler = DBHandler()
+dbHandler.setup_schema("schema.sql")
+
 class Db:
     spanish_answers = ["Esto es", "Hola", "Buenos dias"]
     english_answers = ["This is", "Hi", "Good morning"]
@@ -16,14 +21,6 @@ class Db:
     
     def add_movie(path):
         file = open(path)
-        
-    #def add_movie_to_db(movie_id, title):
-        #connect to db
-        #add row with id and title
-
-    #def add_subtitles_to_db(movie_id, language, path):
-        #read file and make list with sentences.for each line make a new row with same movie_id, same language, calculate scene_id and subtitle.
-
 
 class Handler(BaseHTTPRequestHandler):
 
@@ -71,39 +68,53 @@ class Handler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(b"File not found.")  # Replaces client's page with this message
 
+
     def do_POST(self):
-
-        right_answer, _, _ = Handler.db.find_by_id(Handler.current_id)
-        if not right_answer.endswith(" "):
-            right_answer += " "  # All words, incl the last word, gets an extra space when converted to shuffled list: we need to add a space here for comparison
-
+        
         length = int(self.headers.get("content-length"))
         field_data = self.rfile.read(length)
         fields = parse.parse_qs(str(field_data, "UTF-8"))
-        user_answer = fields["user-answer"][0]
+        
+        if self.path == "/":  # If the post is from the guess form
+            user_answer = fields["user-answer"][0]
 
-        if user_answer == right_answer:
-            Handler.current_id += 1  # Next time Db.find_by_id() is called new sentences will be collected
+            right_answer, _, _ = Handler.db.find_by_id(Handler.current_id)
+            if not right_answer.endswith(" "):
+                right_answer += " "  # All words, incl the last word, gets an extra space when converted to shuffled list: we need to add a space here for comparison
 
-            if Handler.db.find_by_id(Handler.current_id) == None:  # if there are no more sentences in db
+            if user_answer == right_answer:
+                Handler.current_id += 1  # Next time Db.find_by_id() is called new sentences will be collected
+
+                if Handler.db.find_by_id(Handler.current_id) == None:  # if there are no more sentences in db
+                    self.send_response(200)
+                    self.send_header("Content-type", "text/html")
+                    self.end_headers()
+                    self.wfile.write(b"congrats")
+                    return
+                
+                else:  # user guess is correct
+                    self.send_response(200)
+                    self.send_header("Content-type", "text/plain")
+                    self.end_headers()
+                    self.wfile.write(b"correct")
+                    return
+
+            else:  # user guess is wrong
                 self.send_response(200)
                 self.send_header("Content-type", "text/html")
                 self.end_headers()
-                self.wfile.write(b"congrats")
-                return
-            
-            else:  # user guess is correct
-                self.send_response(200)
-                self.send_header("Content-type", "text/plain")
-                self.end_headers()
-                self.wfile.write(b"correct")
-                return
+                self.wfile.write(b"wrong")
+        
+        elif self.path == '/register': # if post is from register form
+            reg_username = fields["reg-username"][0]
+            reg_password = fields["reg-password"][0]
 
-        else:  # user guess is wrong
-            self.send_response(200)
-            self.send_header("Content-type", "text/html")
-            self.end_headers()
-            self.wfile.write(b"wrong") 
+            dbHandler.add_user(reg_username, reg_password)
+
+
+
+        # elif self.path == '/login':  # If post is from login form
+
 
 
 with HTTPServer(("", 8000), Handler) as server:
