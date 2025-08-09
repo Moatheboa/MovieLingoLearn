@@ -68,12 +68,11 @@ form.addEventListener("submit", function (e) {
 });
 
 
-const rgisterform = document.getElementById("register-form");
-form.addEventListener("submit", function (e) {
+const regForm = document.getElementById("reg-form");
+regForm.addEventListener("submit", function (e) {
     e.preventDefault(); // prevent default form behavior
 
-    const registerForm = document.getElementById("registerForm");
-    const formData = new URLSearchParams(new FormData(registerForm));  // FormData takes all names+values from form and converts into URL query string
+    const formData = new URLSearchParams(new FormData(regForm));  // FormData takes all names+values from form and converts into URL query string
 
     fetch("/register", {
         method: "POST",

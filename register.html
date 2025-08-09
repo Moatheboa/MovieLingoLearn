@@ -8,14 +8,14 @@
 
     <body>
         <h2>Create an account</h2>
-        <form id="registerForm">
+        <form id="reg-form" action="/register" method="post"action="/register" method="post">
             <label for="reg-username">Username:</label>
             <input type="text" id="reg-username" name="reg-username" required><br>
 
             <label for="reg-password">Choose a password:</label>
             <input type="password" id="reg-password" name="reg-password" required><br>
 
-            <button id="register-button" type="submit" disabled>Create account</button>
+            <button id="reg-button" type="submit">Create account</button>
         </form>
 
     <script src="main.js" defer></script>

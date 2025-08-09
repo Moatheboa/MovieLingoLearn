@@ -45,9 +45,14 @@ class DBHandler:
             self.connection.commit()
 
     def add_user(self, username, password):
-        sql = "INSERT INTO users (username, password) VALUES(%s, %s)"
-        self.cursor.execute(sql, (username, password))
-        self.connection.commit()
+        try:
+            sql = "INSERT INTO users (username, password) VALUES(%s, %s)"
+            self.cursor.execute(sql, (username, password))
+            self.connection.commit()
+            print("method seems to do it's job")
+        except Exception as e:
+            print("wrong in method")
+            print(e) 
 
     def get_current_scene(self, user, movie_id):
         sql = "SELECT current_scene FROM user_scene_tracking WHERE username = %s AND movie_id = %s"

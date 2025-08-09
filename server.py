@@ -1,6 +1,7 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import random
 from urllib import parse
+from urllib.parse import urlparse
 import mimetypes
 import json
 
@@ -50,7 +51,12 @@ class Handler(BaseHTTPRequestHandler):
             return
 
         # ------------ Sends to htlm --------------------
-        file_path = "." + self.path
+
+        
+        parsed_url = urlparse(self.path)  # seperates the path from any query-parameters (otherwise causes problems when submitting register-form???)
+        file_path = "." + parsed_url.path
+        # file_path = "." + self.path
+
         if self.path == "/":
             file_path = "./index.html"
 
@@ -110,6 +116,11 @@ class Handler(BaseHTTPRequestHandler):
             reg_password = fields["reg-password"][0]
 
             dbHandler.add_user(reg_username, reg_password)
+            self.send_response(200)
+            self.send_header("Content-type", "text/html")
+            self.end_headers()
+            self.wfile.write(b"success")
+            return
 
 
 
