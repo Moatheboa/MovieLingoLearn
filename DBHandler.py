@@ -71,7 +71,7 @@ class DBHandler:
             return 0
         
         stored_hash = result[0]
-        ph = PasswordHasher
+        ph = PasswordHasher()
         try:
             ph.verify(stored_hash, password)
             return 1  # Password match
