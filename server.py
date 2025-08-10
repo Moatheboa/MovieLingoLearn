@@ -33,11 +33,12 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
 
         # ---------- Sends sentences to js ---------
-        spanish, english, img_path = Handler.db.find_by_id(Handler.current_id)
-        spanish_shuffled = [word + " " for word in spanish.split()]  # Adds a space after each word (even the last word!) so it can be compared to original sentence later
-        random.shuffle(spanish_shuffled)
-
+        parsed_url = urlparse(self.path)  # seperates the path from any query-parameters (otherwise causes problems when submitting register-form???)
         if self.path == "/getdata":
+            spanish, english, img_path = Handler.db.find_by_id(Handler.current_id)
+            spanish_shuffled = [word + " " for word in spanish.split()]  # Adds a space after each word (even the last word!) so it can be compared to original sentence later
+            random.shuffle(spanish_shuffled)
+
             self.send_response(200)
             self.send_header("Content-type", "application/json")
             self.send_header("Access-Control-Allow-Origin", "*")  # Allows js to fetch
@@ -51,14 +52,12 @@ class Handler(BaseHTTPRequestHandler):
             return
 
         # ------------ Sends to htlm --------------------
-
         
-        parsed_url = urlparse(self.path)  # seperates the path from any query-parameters (otherwise causes problems when submitting register-form???)
-        file_path = "." + parsed_url.path
-        # file_path = "." + self.path
 
         if self.path == "/":
             file_path = "./index.html"
+        else:
+            file_path = "." + parsed_url.path
 
         try:
             with open(file_path, "rb") as file:
@@ -121,11 +120,30 @@ class Handler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(b"success")
             return
+        
+        elif self.path == '/login': # if post is from login form
+            username = fields["username"][0]
+            password = fields["password"][0]
 
+            result = dbHandler.login(username, password)
+            if result > 0:  # password is correct
+                self.send_response(200)
+                self.send_header("Content-type", "text/html")
+                self.end_headers()
+                self.wfile.write(b"correct")
 
+            elif result < 0:  # password is incorrect
+                self.send_response(200)
+                self.send_header("Content-type", "text/html")
+                self.end_headers()
+                self.wfile.write(b"incorrect")
 
-        # elif self.path == '/login':  # If post is from login form
-
+            else:  # No user with that username exists
+                self.send_response(200)
+                self.send_header("Content-type", "text/html")
+                self.end_headers()
+                self.wfile.write(b"no such user")
+            return
 
 
 with HTTPServer(("", 8000), Handler) as server:

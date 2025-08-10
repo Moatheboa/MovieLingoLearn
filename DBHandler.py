@@ -1,5 +1,6 @@
 import psycopg2
 from psycopg2 import errors
+from argon2 import PasswordHasher
 
 class DBHandler:
     def __init__(self):
@@ -12,10 +13,12 @@ class DBHandler:
         )
         self.cursor = self.connection.cursor()
 
+
     def close(self):
         # self.connection.commit() -> Maybe better to always close cursor and connection when commiting: so using this method each time to commit instead of having commit() in every method?
         self.cursor.close()
         self.connection.close()
+
 
     def setup_schema(self, schema_file):
         with open(schema_file, "r") as f:
@@ -25,10 +28,12 @@ class DBHandler:
             self.cursor.execute(command)
         self.connection.commit()
 
+
     def add_movie(self, title):
         sql = "INSERT INTO movies (title) VALUES(%s)"
         self.cursor.execute(sql, (title,))
         self.connection.commit()
+
 
     def add_subtitles(self, movie_id, language, filepath):
         count = 0
@@ -44,15 +49,35 @@ class DBHandler:
                     self.cursor.execute(sql, (movie_id, count, language, text))
             self.connection.commit()
 
+
     def add_user(self, username, password):
         try:
+            ph = PasswordHasher()
+            hashed_pwd = ph.hash(password)
             sql = "INSERT INTO users (username, password) VALUES(%s, %s)"
-            self.cursor.execute(sql, (username, password))
+            self.cursor.execute(sql, (username, hashed_pwd))
             self.connection.commit()
-            print("method seems to do it's job")
         except Exception as e:
-            print("wrong in method")
-            print(e) 
+            print("Couldn't add user to database")
+            print(e)
+
+
+# Is it better to manipulate webpage directly from method or from server.py's do_post where method is called?
+    def login(self, username, password):
+        sql = "SELECT password FROM users WHERE username = %s"
+        self.cursor.execute(sql, (username,))
+        result = self.cursor.fetchone()
+        if result == None:  # No user with that username
+            return 0
+        
+        stored_hash = result[0]
+        ph = PasswordHasher
+        try:
+            ph.verify(stored_hash, password)
+            return 1  # Password match
+        except Exception as e:
+            return -1  #Password did not match    
+
 
     def get_current_scene(self, user, movie_id):
         sql = "SELECT current_scene FROM user_scene_tracking WHERE username = %s AND movie_id = %s"
