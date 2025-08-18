@@ -5,12 +5,14 @@ DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS movies;
 
 CREATE TABLE movies (
-    id SERIAL PRIMARY KEY,
-    title VARCHAR(200) NOT NULL
+    movie_id SERIAL PRIMARY KEY,
+    title VARCHAR(200) NOT NULL,
+    nr_of_lines INT,
+    poster_path VARCHAR(100)
 );
 
 CREATE TABLE subtitles (
-    movie_id INT REFERENCES movies(id),
+    movie_id INT REFERENCES movies(movie_id),
     movie_scene INT,
     language VARCHAR(5),
     subtitle VARCHAR(400),
@@ -25,7 +27,7 @@ CREATE TABLE users (
 
 CREATE TABLE user_scene_tracking (
     username VARCHAR(20) REFERENCES users(username),
-    movie_id INT REFERENCES movies(id),
+    movie_id INT REFERENCES movies(movie_id),
     current_scene INT,
 
     PRIMARY KEY (username, movie_id)

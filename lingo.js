@@ -9,7 +9,7 @@ fetch('/getdata')  // When user first go to index.html and when we redirect them
     .then(data => {
 
         let currentImgPath = data.img_path;
-        let currentEnglish = data.english;
+        let currentEnglish = data.english_sub;
         let currentTranslation = data.spanish_shuffled;
 
         let img = document.getElementById("scene");
