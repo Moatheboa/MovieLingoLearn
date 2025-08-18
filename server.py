@@ -18,8 +18,26 @@ db_initializing.close()
 
 class Handler(BaseHTTPRequestHandler):
 
-    current_id = 1  # Counter to keep track of which id is used as parameter to db
-    # if we reach [n-1] we need to reset or make other change, otherwie error if trying to access index.html after user has completed all sentences
+    current_id = 1  # Counter to keep track of which id is used as parameter to db: Later this will be fetched from speci. user's table.
+    # if we reach [n-1] we need to reset or make other change, otherwise error if trying to access index.html after user has completed all sentences
+
+    def add_headers(self):
+        """
+    Adds headers for extra security to be used for do_GET and do_POST:
+    - Access-Control-Allow-Origin for CORS -> change later from localhost to real domain
+    - Content-Security-Policy to help protect against XSS
+    """
+        self.send_header("Access-Control-Allow-Origin", "http://localhost:8000")  # Only allows pages from http://localhost:8000 to fetch data.
+        self.send_header(  # Only resources from same domain as server, self, is allowed to execute.
+            "Content-Security-Policy",
+            "default-src 'self'; "
+            "script-src 'self'; "
+            "style-src 'self'; "
+            "img-src 'self' data:; "
+            "connect-src 'self'; "
+        )
+        self.end_headers()
+
 
     def do_GET(self):
         db_get = DBHandler()
@@ -35,16 +53,7 @@ class Handler(BaseHTTPRequestHandler):
 
             self.send_response(200)
             self.send_header("Content-type", "application/json")
-            self.send_header("Access-Control-Allow-Origin", "*")  # Allows js to fetch
-            self.send_header(  # CSP for adding protection agains XSS. Only resourses from same domain as server, self, is allowed to execute.
-                "Content-Security-Policy",
-                "default-src 'self'; "
-                "script-src 'self'; "
-                "style-src 'self'; "
-                "img-src 'self' data:; "
-                "connect-src 'self'; "
-            )
-            self.end_headers()
+            self.add_headers()
             data = {  # using html.escape to prevent xss-attacks when sending data to client
                 "spanish_shuffled": [html.escape(word) for word in spanish_shuffled],  # escape() word by word as the methods is used for strings, not lists.
                 "english_sub": html.escape(english_sub),
@@ -65,16 +74,7 @@ class Handler(BaseHTTPRequestHandler):
                 self.send_response(200)
                 mime_type, _ = mimetypes.guess_type(file_path)
                 self.send_header("Content-type", mime_type or "application/octet-stream")  # Content-type is set based on file extension (mime_type). If unknown, "application/octet-stream" is default
-
-                self.send_header(
-                    "Content-Security-Policy",
-                    "default-src 'self'; "
-                    "script-src 'self'; "
-                    "style-src 'self'; "
-                    "img-src 'self' data:; "
-                    "connect-src 'self'; "
-            )
-                self.end_headers()
+                self.add_headers()
                 self.wfile.write(content)
 
         except FileNotFoundError:
@@ -106,15 +106,7 @@ class Handler(BaseHTTPRequestHandler):
                 if Handler.current_id > db_post.get_nr_of_lines(1): # 1 is for movie_id 1, for now it is not dynamic since we only have one movie
                     self.send_response(200)
                     self.send_header("Content-type", "text/plain")  # For security, use text/plain instead of text/html unless necessary to do otherwise
-                    self.send_header(
-                        "Content-Security-Policy",
-                        "default-src 'self'; "
-                        "script-src 'self'; "
-                        "style-src 'self'; "
-                        "img-src 'self' data:; "
-                        "connect-src 'self'; "
-                    )
-                    self.end_headers()
+                    self.add_headers()
                     self.wfile.write(b"congrats")
                     return
                 
@@ -138,15 +130,7 @@ class Handler(BaseHTTPRequestHandler):
             db_post.add_user(reg_username, reg_password)
             self.send_response(200)
             self.send_header("Content-type", "text/plain")
-            self.send_header(
-                "Content-Security-Policy",
-                "default-src 'self'; "
-                "script-src 'self'; "
-                "style-src 'self'; "
-                "img-src 'self' data:; "
-                "connect-src 'self'; "
-            )
-            self.end_headers()
+            self.add_headers()
             self.wfile.write(b"success")
             return
         
@@ -158,43 +142,19 @@ class Handler(BaseHTTPRequestHandler):
             if result > 0:  # password is correct
                 self.send_response(200)
                 self.send_header("Content-type", "text/plain")
-                self.send_header(
-                        "Content-Security-Policy",
-                        "default-src 'self'; "
-                        "script-src 'self'; "
-                        "style-src 'self'; "
-                        "img-src 'self' data:; "
-                        "connect-src 'self'; "
-                    )
-                self.end_headers()
+                self.add_headers()
                 self.wfile.write(b"correct")
 
             elif result < 0:  # password is incorrect
                 self.send_response(200)
                 self.send_header("Content-type", "text/plain")
-                self.send_header(
-                        "Content-Security-Policy",
-                        "default-src 'self'; "
-                        "script-src 'self'; "
-                        "style-src 'self'; "
-                        "img-src 'self' data:; "
-                        "connect-src 'self'; "
-                    )
-                self.end_headers()
+                self.add_headers()
                 self.wfile.write(b"wrong")
 
             else:  # No user with that username exists
                 self.send_response(200)
                 self.send_header("Content-type", "text/plain")
-                self.send_header(
-                        "Content-Security-Policy",
-                        "default-src 'self'; "
-                        "script-src 'self'; "
-                        "style-src 'self'; "
-                        "img-src 'self' data:; "
-                        "connect-src 'self'; "
-                    )
-                self.end_headers()
+                self.add_headers()
                 self.wfile.write(b"no such user")
             return
 
