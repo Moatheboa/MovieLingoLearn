@@ -62,23 +62,32 @@ class DBHandler:
     def get_nr_of_lines(self, movie_id):
         sql = "SELECT nr_of_lines FROM movies WHERE movie_id = %s"
         self.cursor.execute(sql, (movie_id,))
-        result = self.cursor.fetchone() # result is a tuple
-        if result:
-            return result[0]  # result is an int
-        return None
+        result = self.cursor.fetchone() # result is a tuple. might be empty but not None because it comes as an empty tuple instead of None:
+        if result and result[0] is not None:  # so need to check if result[0] = None aswell.
+            return int(result[0])
+        return None 
+
 
 
     def add_user(self, username, password):
         try:
-            ph = PasswordHasher()
-            hashed_pwd = ph.hash(password)
-            sql = "INSERT INTO users (username, password) VALUES(%s, %s)"
-            self.cursor.execute(sql, (username, hashed_pwd))
-            self.connection.commit()
+            sql1= "SELECT username FROM users WHERE username = %s"
+            self.cursor.execute(sql1, (username,))
+            res = self.cursor.fetchone()
+            if res != None:
+                return -1
+            else:
+                ph = PasswordHasher()
+                hashed_pwd = ph.hash(password)
+                sql = "INSERT INTO users (username, password) VALUES(%s, %s)"
+                self.cursor.execute(sql, (username, hashed_pwd))
+                self.connection.commit()
+                return 1
         except Exception as e:
             self.connection.rollback()
-            print("Couldn't add user to database")
+            print("Couldn't add user to database: ")
             print(e)
+            return 0
 
 
     def login(self, username, password):
@@ -112,15 +121,16 @@ class DBHandler:
             return result[0]  # Return a string
         return None
 
-        
-
 
     def get_current_scene(self, user, movie_id):
         sql = "SELECT current_scene FROM user_scene_tracking WHERE username = %s AND movie_id = %s"
         self.cursor.execute(sql, (user, movie_id))
-        return self.cursor.fetchone()
-    
+        result = self.cursor.fetchone()  # result is a tuple!
+        if result and result[0] is not None:
+            return int(result[0])
+        return None
 
+    
     def update_scene_count(self, user, movie_id, new_count):
         sql = "UPDATE user_scene_tracking SET current_scene = %s WHERE username = %s AND movie_id = %s"
         self.cursor.execute(sql, (new_count, user, movie_id))

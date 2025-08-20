@@ -14,17 +14,14 @@ regForm.addEventListener("submit", function (e) {
         .then(res => res.text())
         .then(text => {
             if (text.includes("success")) {
-                console.log("account created");
                 alert("Your account is created!");
                 location.href = "login.html";  // Relocation to login page after alert.
 
             } else if (text.includes("user exists")) {  // username already in use
-                console.log("user exists");
                 alert("Username already exists, please try another.");
 
-            } else {
-                console.log("invalid password");
-                alert("Some problem, try again with another username and/or password.");
+            } else {  // Exception in DBHandler
+                alert("Unknown problem, couldn't add user to database.");
             }
         });
 });
