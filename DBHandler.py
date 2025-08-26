@@ -62,8 +62,8 @@ class DBHandler:
     def get_nr_of_lines(self, movie_id):
         sql = "SELECT nr_of_lines FROM movies WHERE movie_id = %s"
         self.cursor.execute(sql, (movie_id,))
-        result = self.cursor.fetchone() # result is a tuple. might be empty but not None because it comes as an empty tuple instead of None:
-        if result and result[0] is not None:  # so need to check if result[0] = None aswell.
+        result = self.cursor.fetchone() # result is a tuple. might comes as an empty tuple instead of None:
+        if result and result[0] is not None:  # so need to check if result[0] is None aswell, or int(None) will create a crash
             return int(result[0])
         return None 
 
@@ -118,14 +118,14 @@ class DBHandler:
         self.cursor.execute(sql, (movie_id, movie_scene, language))
         result = self.cursor.fetchone() # result is a tuple
         if result:
-            return result[0]  # Return a string
+            return result[0]  # returns a string or None
         return None
 
 
     def get_current_scene(self, user, movie_id):
         sql = "SELECT current_scene FROM user_scene_tracking WHERE username = %s AND movie_id = %s"
         self.cursor.execute(sql, (user, movie_id))
-        result = self.cursor.fetchone()  # result is a tuple!
+        result = self.cursor.fetchone()  # result is a tuple
         if result and result[0] is not None:
             return int(result[0])
         return None

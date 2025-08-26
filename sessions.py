@@ -10,12 +10,12 @@ import uuid
 
 from DBHandler import DBHandler
 
-db_initializing = DBHandler()
-db_initializing.setup_schema("schema.sql")
-db_initializing.add_movie("Prison Break", "")
-db_initializing.add_subtitles(1, "ES", "spa_sub.srt")
-db_initializing.add_subtitles(1, "EN", "eng_sub.srt")
-db_initializing.close()
+# db_initializing = DBHandler()
+# db_initializing.setup_schema("schema.sql")
+# db_initializing.add_movie("Prison Break", "")
+# db_initializing.add_subtitles(1, "ES", "spa_sub.srt")
+# db_initializing.add_subtitles(1, "EN", "eng_sub.srt")
+# db_initializing.close()
 
 sessions = {}  # session_id -> username. To keep track of logined users
 
