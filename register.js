@@ -2,14 +2,18 @@ const regForm = document.getElementById("reg-form");
 regForm.addEventListener("submit", function (e) {
     e.preventDefault(); // prevent default form behavior
 
-    const regFormData = new URLSearchParams(new FormData(regForm));  // FormData takes all names+values from form and converts into URL query string
+    const regUsername = document.getElementById("reg-username");
+    const regPassword = document.getElementById("reg-password");
 
     fetch("/register", {
         method: "POST",
         headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
+            "Content-Type": "application/json",
         },
-        body: regFormData,
+        body: JSON.stringify({
+            "regUsername": regUsername.value,
+            "regPassword": regPassword.value,
+        }),
     })
         .then(res => res.text())
         .then(text => {

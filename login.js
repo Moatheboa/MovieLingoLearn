@@ -2,14 +2,18 @@ const loginForm = document.getElementById("login-form");
 loginForm.addEventListener("submit", function (e) {
     e.preventDefault(); // prevent default form behavior
 
-    const loginFormData = new URLSearchParams(new FormData(loginForm));  // FormData takes all names+values from form and converts into URL query string
+    const username = document.getElementById("username");
+    const password = document.getElementById("password");
 
     fetch("/login", {
         method: "POST",
         headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
+            "Content-Type": "application/json",
         },
-        body: loginFormData,
+        body: JSON.stringify({
+            "username": username.value,
+            "password": password.value,
+        }),
     })
         .then(res => res.text())
         .then(text => {

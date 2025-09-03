@@ -13,7 +13,7 @@ db_initializing.setup_schema("schema.sql")
 db_initializing.add_movie("Prison Break", "")
 db_initializing.add_subtitles(1, "ES", "spa_sub.srt")
 db_initializing.add_subtitles(1, "EN", "eng_sub.srt")
-db_initializing.close()
+db_initializing.connection.close()
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -37,6 +37,11 @@ class Handler(BaseHTTPRequestHandler):
 
 
     def do_GET(self):
+        if self.path == "/favicon.ico":  # To prevent error because there's no favicon yet.
+            self.send_response(204)  # No content
+            self.end_headers()
+            return
+
         db_get = DBHandler()
         
         # ---------- Sends sentences to js ---------
@@ -80,7 +85,7 @@ class Handler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(b"File not found.")  # Replaces client's page with this message
 
-        db_get.close()
+        db_get.connection.close()
 
 
     def do_POST(self):
@@ -169,7 +174,7 @@ class Handler(BaseHTTPRequestHandler):
                 self.wfile.write(b"no such user")
             return
 
-        db_post.close()
+        db_post.connection.close()
 
 
 with HTTPServer(("", 8000), Handler) as server:

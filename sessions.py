@@ -10,12 +10,13 @@ import uuid
 
 from DBHandler import DBHandler
 
-# db_initializing = DBHandler()
-# db_initializing.setup_schema("schema.sql")
-# db_initializing.add_movie("Prison Break", "")
-# db_initializing.add_subtitles(1, "ES", "spa_sub.srt")
-# db_initializing.add_subtitles(1, "EN", "eng_sub.srt")
-# db_initializing.close()
+# Following should run only once to set up tables and data in db, if run again data added to create users and track user progress would be lost:
+db_initializing = DBHandler()
+db_initializing.setup_schema("schema.sql")
+db_initializing.add_movie("Prison Break", "")
+db_initializing.add_subtitles(1, "ES", "spa_sub.srt")
+db_initializing.add_subtitles(1, "EN", "eng_sub.srt")
+db_initializing.connection.close()
 
 sessions = {}  # session_id -> username. To keep track of logined users
 
@@ -56,7 +57,6 @@ class Handler(BaseHTTPRequestHandler):
 
         db_get = DBHandler()
         user = self.get_session_user()  # Checks if the user is logged in
-        scene = db_get.get_current_scene(user, 1) or 1  # The scene nr that the user is to work on. If first time, scene is set to 1
 
         # ---------- Sends sentences to js ---------
         if self.path == "/getdata":
@@ -67,10 +67,13 @@ class Handler(BaseHTTPRequestHandler):
                 self.wfile.write(b"Unauthorized")
                 return
 
+            scene = db_get.get_current_scene(user, 1) or 1  # The scene nr that the user is to work on. If first time, scene is set to 1
+
             img_path = "content/01_breaking_bad/images/1.jpg"
             english_sub = db_get.get_subtitles(1, scene, "EN")
             spanish_sub = db_get.get_subtitles(1, scene, "ES")
-            spanish_shuffled = [word + " " for word in spanish_sub.split()]
+
+            spanish_shuffled = [word + " " for word in spanish_sub.split()] # if space is not added the words will appear concatenated in "user-guess" on screen as user is guessing.
             random.shuffle(spanish_shuffled)
 
             self.send_response(200)
@@ -111,7 +114,7 @@ class Handler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(b"File not found.")
 
-        db_get.close()
+        db_get.connection.close()
 
 
     def do_POST(self):
@@ -121,19 +124,20 @@ class Handler(BaseHTTPRequestHandler):
 
         length = int(self.headers.get("content-length"))
         field_data = self.rfile.read(length)
-        fields = parse.parse_qs(str(field_data, "UTF-8"))
+        data = json.loads(field_data)
+
         
         if self.path == "/":  # If the post is from the guess form
-            user_answer = fields["user-answer"][0]
+            user_answer = data["user-answer"]
             right_answer = db_post.get_subtitles(1, scene, "ES")
 
             if not right_answer.endswith(" "):
                 right_answer += " "  # All words, incl the last word, gets an extra space when converted to shuffled list: we need to add a space here for comparison
 
             if user_answer == right_answer:
-                scene += 1  # 
+                scene += 1
                 db_post.update_scene_count(user, 1, scene)  # updates the scene count for the user and that movie in the db
-                scene_from_db = db_post.get_current_scene(user, 1)
+                # scene_from_db = db_post.get_current_scene(user, 1)
 
                 # if there are no more sentences in db for this movie
                 if scene > db_post.get_nr_of_lines(1):  # 1 is for movie_id 1, for now it is not dynamic since we only have one movie
@@ -157,8 +161,8 @@ class Handler(BaseHTTPRequestHandler):
                 self.wfile.write(b"wrong")
         
         elif self.path == '/register': # if post is from register form
-            reg_username = fields["reg-username"][0]
-            reg_password = fields["reg-password"][0]
+            reg_username = data["regUsername"]
+            reg_password = data["regPassword"]
 
             res = db_post.add_user(reg_username, reg_password)
             if res > 0: 
@@ -181,8 +185,8 @@ class Handler(BaseHTTPRequestHandler):
                 self.wfile.write(b"exception")
         
         elif self.path == '/login':  # if post is from login form
-            username = fields["username"][0]
-            password = fields["password"][0]
+            username = data["username"]
+            password = data["password"]
 
             result = db_post.login(username, password)
             if result > 0:  # password is correct
@@ -213,7 +217,7 @@ class Handler(BaseHTTPRequestHandler):
                 self.wfile.write(b"no such user")
             return
 
-        db_post.close()
+        db_post.connection.close()
 
 
 with HTTPServer(("", 8000), Handler) as server:

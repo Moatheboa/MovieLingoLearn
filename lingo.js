@@ -4,38 +4,43 @@ let optionsDiv = document.getElementById("options");
 let wordCount = 0;  //Nr of words user sent to userGuess
 let spanishLength = 0;  // Nr of words in spanish sentence
 
-fetch('/getdata')  // When user first go to index.html and when we redirect them there after correct guess
-    .then(response => response.json())
-    .then(data => {
+function loadData() {
+    fetch('/getdata')  // When user first go to index.html and when we redirect them there after correct guess
+        .then(response => response.json())
+        .then(data => {
+            optionsDiv.innerText = "";
 
-        let currentImgPath = data.img_path;
-        let currentEnglish = data.english_sub;
-        let currentTranslation = data.spanish_shuffled;
+            let currentImgPath = data.img_path;
+            let currentEnglish = data.english_sub;
+            let currentTranslation = data.spanish_shuffled;
 
-        let img = document.getElementById("scene");
-        img.src = currentImgPath;
+            let img = document.getElementById("scene");
+            img.src = currentImgPath;
 
-        let englishSentence = document.getElementById("english-subtitles");
-        englishSentence.innerText = currentEnglish;
-        spanishLength = currentTranslation.length;
-        userGuess.value = "";  // Reset to clean from last guess words
+            let englishSentence = document.getElementById("english-subtitles");
+            englishSentence.innerText = currentEnglish;
+            spanishLength = currentTranslation.length;
+            userGuess.value = "";  // Reset to clean from last guess words
+            wordCount = 0;  // Reset from last value.
 
-        for (let i = 0; i < spanishLength; i++) {
-            let optionButton = document.createElement("button");
-            optionButton.id = "b" + i;
-            optionButton.className = "option-button";
-            optionButton.textContent = currentTranslation[i];
-            optionButton.onclick = function () {
-                optionButton.classList.toggle("selected-option");  // changes buttons aesthetics in css
-                optionButton.disabled = true;  // makes it unclickable
-                userGuess.value += currentTranslation[i];  // adds the word to div for user's guess
-                wordCount += 1;
-                sendButton.disabled = (wordCount !== spanishLength);
+            for (let i = 0; i < spanishLength; i++) {
+                let optionButton = document.createElement("button");
+                optionButton.id = "b" + i;
+                optionButton.className = "option-button";
+                optionButton.textContent = currentTranslation[i];
+                optionButton.onclick = function () {
+                    optionButton.classList.toggle("selected-option");  // changes buttons aesthetics in css
+                    optionButton.disabled = true;  // makes it unclickable
+                    userGuess.value += currentTranslation[i];  // adds the word to div for user's guess
+                    wordCount += 1;
+                    sendButton.disabled = (wordCount !== spanishLength);
+                }
+                optionsDiv.appendChild(optionButton);
             }
-            optionsDiv.appendChild(optionButton);
-        }
-    });
+        });
+}
 
+loadData();
 
 const form = document.getElementById("guess-form");  // when user clicks Send
 form.addEventListener("submit", function (e) {
@@ -44,9 +49,9 @@ form.addEventListener("submit", function (e) {
     fetch("/", {  // sends to server.py to check if user guessed right or wrong
         method: "POST",
         headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
+            "Content-Type": "application/json",
         },
-        body: new URLSearchParams({ "user-answer": userGuess.value }),
+        body: JSON.stringify({ "user-answer": userGuess.value }),
     })
         .then(res => res.text())
         .then(text => {
@@ -62,7 +67,7 @@ form.addEventListener("submit", function (e) {
                     button.classList.remove("selected-option");
                 });
             } else {
-                location.reload(); // user guessed right, next sentence is loaded
+                loadData(); // user guessed right, next sentence is loaded
             }
         });
 });
