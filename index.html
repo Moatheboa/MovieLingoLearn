@@ -2,25 +2,32 @@
 <html>
     <head>
         <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>MovieLingo</title>
         <link rel="stylesheet" href="style.css">
     </head>
 
     <body>
-        <div id="sceneCtn">
-            <img id="scene" src="" alt="Picture from movie scene" />
-        </div>
+        <main class="index-main">
+            <h1 class="header">MovieLingo</h1>
 
-        <form id="guess-form">  <!-- No action because post is now made in js -->
-        <input id="user-answer" name="user-answer" />
-        <input id="send-button" type="submit" value="Send" disabled />
-        </form>
+            <div id="sceneCtn">
+                <img id="scene" src="" alt="Picture from movie scene" />
+            </div>
 
-        <div id="english-subtitles">
-        </div>
-        <div id="options">
-        </div>
+            <div id="index-form">
+                <form id="guess-form">  <!-- No action because post is made in js -->
+                    <input id="user-answer" name="user-answer" />
+                    <input id="send-button" type="submit" value="Send" disabled />
+                </form>
 
+                <div id="english-subtitles">
+                </div>
+                <div id="options">
+                </div>
+            </div>
+
+        </main>
     <script src="lingo.js" defer></script>
     </body>
 </html>

@@ -2,21 +2,27 @@
 <html>
     <head>
         <meta charset="UTF-8">
-        <title>MovieLingo login</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>MovieLingo register</title>
         <link rel="stylesheet" href="style.css">
     </head>
 
     <body>
-        <h2>Create an account</h2>
-        <form id="reg-form" action="/register" method="post"action="/register" method="post">
-            <label for="reg-username">Username:</label>
-            <input type="text" id="reg-username" name="reg-username" required><br>
+        <main class="forms-main">
+            <h1 class="header">MovieLingo</h1>
+            <div class="forms">
+                <h2>Create an account</h2>
+                <form id="reg-form" action="/register" method="post">
+                    <label for="reg-username">Username:</label>
+                    <input type="text" id="reg-username" name="reg-username" required><br>
 
-            <label for="reg-password">Choose a password:</label>
-            <input type="password" id="reg-password" name="reg-password" required><br>
+                    <label for="reg-password">Choose a password:</label>
+                    <input type="password" id="reg-password" name="reg-password" required><br>
 
-            <button id="reg-button" type="submit">Create account</button>
-        </form>
+                    <button id="reg-button" type="submit">Create account</button>
+                </form>
+            </div>
+        </main>
 
     <script src="register.js" defer></script>
     </body>

@@ -1,6 +1,6 @@
-let userGuess = document.getElementById("user-answer");
+let userAnswer = document.getElementById("user-answer");
 let sendButton = document.getElementById("send-button");
-let optionsDiv = document.getElementById("options");
+let options = document.getElementById("options");
 let wordCount = 0;  //Nr of words user sent to userGuess
 let spanishLength = 0;  // Nr of words in spanish sentence
 
@@ -8,7 +8,7 @@ function loadData() {
     fetch('/getdata')  // When user first go to index.html and when we redirect them there after correct guess
         .then(response => response.json())
         .then(data => {
-            optionsDiv.innerText = "";
+            options.innerText = "";
 
             let currentImgPath = data.img_path;
             let currentEnglish = data.english_sub;
@@ -20,8 +20,9 @@ function loadData() {
             let englishSentence = document.getElementById("english-subtitles");
             englishSentence.innerText = currentEnglish;
             spanishLength = currentTranslation.length;
-            userGuess.value = "";  // Reset to clean from last guess words
+            userAnswer.value = "";  // Reset to clean from last guess words
             wordCount = 0;  // Reset from last value.
+            sendButton.disabled = true; // Reset send button as disabled.
 
             for (let i = 0; i < spanishLength; i++) {
                 let optionButton = document.createElement("button");
@@ -31,11 +32,11 @@ function loadData() {
                 optionButton.onclick = function () {
                     optionButton.classList.toggle("selected-option");  // changes buttons aesthetics in css
                     optionButton.disabled = true;  // makes it unclickable
-                    userGuess.value += currentTranslation[i];  // adds the word to div for user's guess
+                    userAnswer.value += currentTranslation[i];  // adds the word to div for user's guess
                     wordCount += 1;
-                    sendButton.disabled = (wordCount !== spanishLength);
+                    sendButton.disabled = (wordCount !== spanishLength);  // If all words have been chosen, sendbutton is enabled.
                 }
-                optionsDiv.appendChild(optionButton);
+                options.appendChild(optionButton);
             }
         });
 }
@@ -51,16 +52,17 @@ form.addEventListener("submit", function (e) {
         headers: {
             "Content-Type": "application/json",
         },
-        body: JSON.stringify({ "user-answer": userGuess.value }),
+        body: JSON.stringify({ "user-answer": userAnswer.value }),
     })
         .then(res => res.text())
         .then(text => {
             if (text.includes("congrats")) {  // User was correct and there are no more sentences in db
-                alert("You completed all sentences!");
-                // Here we need to reset current_id in py for db, cannot acces webpage otherwise.
+                alert("Congratulations! You completed all sentences. Your progress is reset and you can start over.");
+                loadData();
+ 
             } else if (text.includes("wrong")) {  // user guessed wrong
                 alert("Wrong! Try again.");
-                userGuess.value = "";
+                userAnswer.value = "";
                 wordCount = 0;
                 document.querySelectorAll(".option-button").forEach(button => {
                     button.disabled = false;

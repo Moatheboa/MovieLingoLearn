@@ -9,16 +9,162 @@ body {
   justify-content: center;
   min-height: 100vh;
   margin: 0;
+  font-family: Georgia, "Times New Roman", Times, serif;
+  background-color: #5b0422;
+  overflow: hidden; /* hindrar scroll */
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  border: 2px solid black;
+  border-radius: 10px;
+  padding-top: 4em;
+  padding-bottom: 4em;
+  align-items: center;
+  text-align: center;
+  background-color: #FAF0E6;
+}
+
+.index-main {
+  min-width: 70%;
+}
+
+.forms-main {
+  padding-left: 4em;
+  padding-right: 4em;
+}
+
+.header {
+  font-size: 3em;
+  font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
+  font-style: italic;
+  color: silver;
+  -webkit-text-stroke: 2px black; /* svart kant */
+  text-shadow: 0 0 5px gray;
+  margin-top: 0;
 }
 
 #scene {
-    width: 400px;
+  width: 30em;
+  border: 2px solid black;
+  border-radius: 10px;
+}
+
+#user-answer, #send-button, #english-subtitles, #options {
+  font-size: 1.3em;
+}
+
+#send-button {
+  margin-left: 0.3em;
 }
 
 .option-button {
     background-color: lightgray;
+    margin-left: 0.2em;
+    font-size: 1.1em;
+    border-radius: 5px;
 }
 
 .selected-option {
     background-color: darkgray;
+}
+
+#guess-form {
+  display:flex;
+  align-items: center;
+  text-align: center;
+}
+
+.forms {
+  font-size: 1.2em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  border: 2px solid black;
+  border-radius: 10px;
+  padding: 2em;
+  background-color: #c1afd7;
+}
+
+.forms h2 {
+  margin-bottom: 0.2em;
+}
+
+.forms button {
+  margin-top: 1.2em;
+}
+
+.forms p {
+  margin-top: 2em;
+}
+
+@media (max-width: 900px) and (orientation: portrait) {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html, body {
+    height: 100%;
+  }
+
+  main {
+    width: 100%;
+    height: 100dvh;
+    border: none;
+    border-radius: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #FAF0E6;
+  }
+
+  .header {
+    margin-bottom: 1em;
+  }
+
+  #scene{
+    width: 90%;
+    margin-bottom: 1em;
+  }
+
+  #reg-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2em;
+    white-space: nowrap;
+  }
+  
+  #index-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7em;
+  }
+
+  .forms h2 {
+    margin-bottom: 1.1em;
+  }
+
+  .forms a {
+    white-space: nowrap;
+  }
+  
+  #user-answer, #send-button, #english-subtitles {
+    font-size: 1em;
+  }
+
+  .option-button {
+    font-size: 0.9em;
+    padding: 0.1 0.5em;
+  }
+
+  #reg-button, #login-button {
+    padding: 0 0.5em;
+    width: auto;
+    align-self: center;
+  }
 }
