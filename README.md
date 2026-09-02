@@ -1,5 +1,6 @@
 A language trainer where you practice Spanish by
 translating English sentences taken from real movie subtitles.
+Built without frameworks on Python's standard library and vanilla JS.
 
 Features:
 - User registration and login
